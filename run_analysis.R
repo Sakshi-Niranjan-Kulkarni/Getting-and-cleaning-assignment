@@ -1,54 +1,53 @@
-#1. Downloading and unzipping dataset
-#******************************************************************
-#Step 0. Downloading and unzipping dataset
-#******************************************************************
+## Load "reshape2" package, that allows as to reshape a data frame with repeated measurements 
+## in separate columns of the same record and repeated measurements in separate records.
+library(reshape2)
 
-if(!file.exists("./data")){dir.create("./data")}
-#Here are the data for the project:
-@@ -11,7 +13,7 @@ unzip(zipfile="./data/Dataset.zip",exdir="./data")
-#You should create one R script called run_analysis.R that does the following.
+## Download the file and put it in the data folder:
+if (!file.exists("./data")) {dir.create("./data")}
+URL <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+download.file(URL, "./data/Dataset.zip", method = "curl")
 
-#******************************************************************
-#1.Merges the training and the test sets to create one data set.
-#Step 1.Merges the training and the test sets to create one data set.
-#******************************************************************
+## Unzip files in the created directory
+unzip("./data/Dataset.zip", exdir = "./data")
 
-# 1.1 Reading files
-@@ -55,7 +57,7 @@ setAllInOne <- rbind(mrg_train, mrg_test)
-#[1] 10299   563
+## Get the list of unzipped files
+folder <- file.path("./data", "UCI HAR Dataset")
+list_files <- list.files(folder, recursive = T)
+list_files
 
-#******************************************************************
-#2.-Extracts only the measurements on the mean and standard deviation for each measurement.
-#Step 2.-Extracts only the measurements on the mean and standard deviation for each measurement.
-#******************************************************************
+## Select activity labels and features
+act_labels <- read.table("./data/UCI HAR Dataset/activity_labels.txt")
+act_labels[,2] <- as.character(act_labels[,2])
+features <- read.table("./data/UCI HAR Dataset/features.txt")
+features[,2] <- as.character(features[,2])
 
-#2.1 Reading column names:
-@@ -75,21 +77,21 @@ mean_and_std <- (grepl("activityId" , colNames) |
-setForMeanAndStd <- setAllInOne[ , mean_and_std == TRUE]
+## Extract mean and standard deviation
+msd_features <- grep(".*mean.*|.std.*", features[,2])
+msd_features_names <- features[msd_features,2]
+msd_features_names = gsub('-mean', 'Mean', msd_features_names)
+msd_features_names = gsub('-std', 'Std', msd_features_names)
+msd_features_names <- gsub('[-()]', '', msd_features_names)
 
-#******************************************************************
-#3. Uses descriptive activity names to name the activities in the data set
-#Step 3. Uses descriptive activity names to name the activities in the data set
-#******************************************************************
+## Load the datasets
+train <- read.table("./data/UCI HAR Dataset/train/X_train.txt")[msd_features]
+train_act <- read.table("./data/UCI HAR Dataset/train/Y_train.txt")
+train_sub <- read.table("./data/UCI HAR Dataset/train/subject_train.txt")
+train <- cbind(train_sub, train_act, train)
 
-setWithActivityNames <- merge(setForMeanAndStd, activityLabels,
-                              by='activityId',
-                              all.x=TRUE)
+test <- read.table("./data/UCI HAR Dataset/test/X_test.txt")[msd_features]
+test_act <- read.table("./data/UCI HAR Dataset/test/Y_test.txt")
+test_sub <- read.table("./data/UCI HAR Dataset/test/subject_test.txt")
+test <- cbind(test_sub, test_act, test)
 
-#******************************************************************
-#4. Appropriately labels the data set with descriptive variable names.
-#Step 4. Appropriately labels the data set with descriptive variable names.
-#******************************************************************
+## Merge datasets and add labels
+merged_data <- rbind(train, test)
+colnames(merged_data) <- c("subject", "activity", msd_features_names)
 
-#Done in previous steps, see 1.3,2.2 and 2.3!
+## Transform activities and subjects into factors
+merged_data$activity <- factor(merged_data$activity, levels = act_labels[,1], labels = act_labels[,2])
+merged_data$subject <- as.factor(merged_data$subject)
 
-#******************************************************************
-#5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
-#Step 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
-#******************************************************************
+tidy_data <- melt(merged_data, id = c("subject", "activity"))
+tidy_data_mean <- dcast(tidy_data, subject + activity ~ variable, mean)
 
-#5.1 Making a second tidy data set
-secTidySet <- aggregate(. ~subjectId + activityId, setWithActivityNames, mean)
-secTidySet <- secTidySet[order(secTidySet$subjectId, secTidySet$activityId),]
-#5.2 Writing second tidy data set in txt file
-write.table(secTidySet, "secTidySet.txt", row.name=FALSE)
+write.table(tidy_data_mean, "tidy.txt", row.names = FALSE, quote = FALSE)
