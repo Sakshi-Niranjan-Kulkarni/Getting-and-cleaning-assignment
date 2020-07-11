@@ -1,16 +1,11 @@
-GettingandCleaningDataCourseProject
-Peer-graded Assignment: Getting and Cleaning Data Course Project
+# Getting-and-Cleaning-Data-Course-Project
+This is the solution for the course project for the Getting and Cleaning Data Coursera course, organised by the JHU. This R script (run_analysis.R) is supposed to do the following steps:
+1) If necessary, downloads the "UCI HAR Dataset" into the working directory.
+2) Loads files concerning "activity" and "feature" info.
+3) Loads both training and test datasets, extracting information referred to the mean and standard deviation for each measurement.
+4) Loads the activity and subject columns for each dataset (training and test), and merges those columns with the dataset.
+5) Merges these datasets.
+6) Transforms activity and subject columns into factors.
+7) Creates a final dataset that consists of the mean value of each variable for each subject-activity pair.
 
-The script called run_analysis.R works by processing the data set https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
-
-according to the 5 steps defined below:
-
-1. Merges the training and the test sets to create one data set.
-
-2. Extracts only the measurements on the mean and standard deviation for each measurement.
-
-3. Uses descriptive activity names to name the activities in the data set
-
-4. Appropriately labels the data set with descriptive variable names.
-
-5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subjects.
+The result of these steps is shown in sectidy.txt
