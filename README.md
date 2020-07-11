@@ -8,4 +8,4 @@ This is the solution for the course project for the Getting and Cleaning Data Co
 6) Transforms activity and subject columns into factors.
 7) Creates a final dataset that consists of the mean value of each variable for each subject-activity pair.
 
-The result of these steps is shown in secTidySet.txt
+The result of these steps is shown in SecTidySet.txt
